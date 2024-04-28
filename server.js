@@ -1,33 +1,36 @@
 const express = require('express');
 const cors = require('cors');
 const xlsx = require('xlsx');
-
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
-
-// Serve static files from the 'public' directory
 app.use(express.static('public'));
 
-// Function to read data from Excel file
 function readExcelData(filePath) {
-    const workbook = xlsx.readFile(filePath);
-    const sheetName = workbook.SheetNames[0]; // Get the first sheet name
-    const worksheet = workbook.Sheets[sheetName];
-    const data = xlsx.utils.sheet_to_json(worksheet);
-    return data; // Returns an array of objects based on Excel rows
+    try {
+        const workbook = xlsx.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        return xlsx.utils.sheet_to_json(worksheet);
+    } catch (error) {
+        console.error('Failed to read Excel file:', error);
+        throw error; // Rethrow the error to be caught in the endpoint
+    }
 }
 
-// API endpoint to serve shifts data from Excel file
 app.get('/api/shifts', (req, res) => {
-    const shifts = readExcelData('C:\Users\Minh\Documents\AggieHouse\Test Calendar 2024.xlsx');
-    console.log(shifts);  // Log data to see its structure
-    res.json(shifts);
+    const filePath = 'C:\\Users\\Minh\\Documents\\AggieHouse\\TestCalendar2024.xlsx'; // Updated file path
+    try {
+        console.log('Attempting to read Excel file from:', filePath);
+        const shifts = readExcelData(filePath);
+        console.log('Data read successfully:', shifts);
+        res.json(shifts);
+    } catch (error) {
+        console.error('Error reading Excel file:', error);
+        res.status(500).send('Error processing Excel file');
+    }
 });
 
-
-// Server port configuration
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
