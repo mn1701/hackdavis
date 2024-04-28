@@ -28,3 +28,22 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Error fetching data:', error);
     });
 });
+
+document.getElementById('reminderForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const subject = document.getElementById('subject').value;
+    const message = document.getElementById('message').value;
+    const recipients = document.getElementById('recipients').value;
+
+    fetch('/send-custom-reminders', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subject, message, recipients })
+    })
+    .then(response => response.text())
+    .then(data => alert(data))
+    .catch(error => console.error('Error sending reminders:', error));
+});

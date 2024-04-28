@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-const API_KEY = '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'; // Ensure to replace with your actual SendGrid API key
+// const API_KEY = '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'; // Ensure to replace with your actual SendGrid API key
 sgMail.setApiKey(API_KEY);
 
 function readExcelData(filePath, sheetNumber = 0) {
@@ -22,9 +22,9 @@ function readExcelData(filePath, sheetNumber = 0) {
         throw error;  // Rethrow the error to be caught in the endpoint
     }
 }
+const filePath = 'C:\\Users\\Minh\\Documents\\AggieHouse\\TestCalendar2024.xlsx';
 
 app.get('/api/shifts', (req, res) => {
-    const filePath = 'C:\\Users\\Minh\\Documents\\AggieHouse\\TestCalendar2024.xlsx';
     try {
         const shifts = readExcelData(filePath, 0);
         console.log('Data read successfully:', shifts);
@@ -35,18 +35,39 @@ app.get('/api/shifts', (req, res) => {
     }
 });
 
-const message = {
-    to: 'mhanguyen@ucdavis.edu',
-    from: 'aggiehouseschedules@gmail.com',
-    subject: 'hello hello',
-    text: 'hello',
-    html: '<h1>Hello</h1>',
-};
+app.post('/send-custom-reminders', (req, res) => {
+    const { message, subject, recipients } = req.body;
+    const contactInfo = readExcelData(filePath, 1); // 1 is typically the index for the second sheet
+    
+    let emailsToSend = [];
 
-sgMail
-    .send(message)
-    .then((response) => console.log('emailsent'))
-    .catch((error) => console.log(error.message));
+    if (recipients === 'all') {
+        emailsToSend = contactInfo.map(item => item.email);  // Adjust 'email' if the column name is different
+    } else {
+        // For individual or selected emails, parse the recipients field
+        emailsToSend = recipients.split(',').map(email => email.trim());
+    }
+
+    emailsToSend.forEach(email => {
+        sendReminderEmail(email, subject, message);
+    });
+
+    res.send('Emails sent successfully');
+});
+
+
+function sendReminderEmail(to, subject, text) {
+    const msg = {
+        to: to,
+        from:'aggiehouseschedules@gmail.com',  // This should be a verified sender
+        subject: subject,
+        text: text,
+    };
+
+    sgMail.send(msg)
+        .then(() => console.log('Email sent successfully to', to))
+        .catch((error) => console.error('Error sending email:', error));
+}
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
