@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// const API_KEY = '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'; // Ensure to replace with your actual SendGrid API key
+const API_KEY = ''; // Ensure to replace with your actual SendGrid API key
 sgMail.setApiKey(API_KEY);
 
 function readExcelData(filePath, sheetNumber = 0) {
