@@ -22,7 +22,7 @@ function readExcelData(filePath) {
 
 // API endpoint to serve shifts data from Excel file
 app.get('/api/shifts', (req, res) => {
-    const shifts = readExcelData('C:/Users/Minh/Documents/Test Calendar 2024.xlsx');
+    const shifts = readExcelData('C:\Users\Minh\Documents\AggieHouse\Test Calendar 2024.xlsx');
     console.log(shifts);  // Log data to see its structure
     res.json(shifts);
 });
